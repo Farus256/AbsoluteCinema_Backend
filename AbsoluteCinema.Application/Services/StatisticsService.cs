@@ -4,6 +4,7 @@ using AbsoluteCinema.Domain.Entities;
 using AbsoluteCinema.Domain.Interfaces;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Specialized;
 
 namespace AbsoluteCinema.Application.Services
 {
@@ -26,10 +27,6 @@ namespace AbsoluteCinema.Application.Services
             if (startDate.HasValue && endDate.HasValue)
             {
                 tickets = tickets.Where(t => t.Session.Date >= startDate.Value && t.Session.Date <= endDate.Value);
-            }
-            else
-            {
-                tickets = tickets.Where(t => t.Session.Date >= DateTime.MinValue && t.Session.Date <= DateTime.Now);
             }
 
             return tickets.Sum(t => t.Price);
@@ -74,7 +71,7 @@ namespace AbsoluteCinema.Application.Services
             return result;
         }
 
-        public async Task<HallDto> GetMostPopularHallAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<HallDto>> GetTopHallsByPeriodAsync(DateTime startDate, DateTime endDate, string orderDir = "desc")
         {
             var tickets = await _unitOfWork.Repository<Ticket>()
                .GetAllAsync(include: query => query.Include(t => t.Session).ThenInclude(g => g.Hall));
@@ -82,21 +79,14 @@ namespace AbsoluteCinema.Application.Services
             var query = tickets
                 .Where(t => t.Session.Date >= startDate && t.Session.Date <= endDate)
                 .GroupBy(t => t.Session.HallId)
-                .Select(g => new
+                .Select(g => new HallDto
                 {
                     HallId = g.Key,
-                    HallName = g.FirstOrDefault().Session.Hall.Name,
+                    Name = g.FirstOrDefault().Session.Hall.Name,
                     Popularity = Math.Round((double)g.Count() / (g.FirstOrDefault().Session.Hall.PlaceCount * g.FirstOrDefault().Session.Hall.RowCount), 3)
-                })
-                .OrderByDescending(h => h.Popularity)
-                .FirstOrDefault();
+                });
 
-            return new HallDto
-            {
-                HallId = query.HallId,
-                Name = query.HallName,
-                Popularity = query.Popularity
-            };
+            return orderDir.ToLower() == "asc" ? query.OrderBy(m => m.Popularity) : query.OrderByDescending(m => m.Popularity);
         }
 
         public async Task<IEnumerable<WeekdayDto>> GetBusiestDaysAsync()
