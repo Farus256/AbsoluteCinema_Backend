@@ -12,6 +12,11 @@ public class UserMappingProfile : Profile
         
         CreateMap<GetAllUsersDto, ApplicationUser>();
         
-        CreateMap<UpdateUserDto, ApplicationUser>();
+        CreateMap<UpdateUserDto, ApplicationUser>()
+            .ForMember(dest => dest.BirthDate,
+                opt => {
+                    opt.Condition(src => src.BirthDate.HasValue);
+                    opt.MapFrom(src => DateTime.SpecifyKind(src.BirthDate!.Value, DateTimeKind.Utc));
+                });
     }
 }

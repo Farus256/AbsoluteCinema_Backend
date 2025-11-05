@@ -16,7 +16,7 @@ public class RegisterMappingProfile : Profile
             .ForMember(dest => dest.Email,        opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.FirstName,    opt => opt.MapFrom(src => src.FirstName))
             .ForMember(dest => dest.LastName,     opt => opt.MapFrom(src => src.LastName))
-            .ForMember(dest => dest.BirthDate,    opt => opt.MapFrom(src => src.BirthDate))
+            .ForMember(dest => dest.BirthDate,    opt => opt.MapFrom(src => DateTime.SpecifyKind(src.BirthDate, DateTimeKind.Utc)))
                 
             // Игнорируем ВСЕ свойства Identity
             .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
