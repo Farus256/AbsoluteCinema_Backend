@@ -124,7 +124,8 @@ namespace AbsoluteCinema.Application.Services
                     .ThenInclude(s => s.Hall)
                     .Include(t => t.ApplicationUser)
                     .Include(t => t.Status),
-                    orderBy: query => query.OrderBy(t => t.Id)
+                    orderBy: query => query.OrderBy(t => t.Id),
+                    page: 1, pageSize: 100
             );
             
             tickets = tickets.Where(t => t.UserId == userId);
