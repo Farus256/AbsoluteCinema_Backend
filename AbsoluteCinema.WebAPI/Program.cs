@@ -18,10 +18,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(reactClientCORSPolicy, policy =>
     {
-        policy.WithOrigins(builder.Configuration["ClientAddress"]!) 
+        var clientAddress = builder.Configuration["ClientAddress"]!;
+        policy.WithOrigins(clientAddress)
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .AllowCredentials(); 
+              .AllowCredentials()
+              .SetIsOriginAllowedToAllowWildcardSubdomains(); 
     });
 });
 
@@ -30,14 +32,11 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ApiExceptionFilterAttribute>();
 }).AddJsonOptions(options =>
 {
-    // Додаємо конвертер для серіалізації enum як рядків
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-
-    // Знімаємо правило на точні назви при запитах
-    //options.JsonSerializerOptions.PropertyNamingPolicy = null;
 });
 
-//Swagger
+builder.Services.AddSignalR();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
 {
@@ -60,7 +59,6 @@ builder.Services.AddSwaggerGen(o =>
     });
 });
 
-//Dependency Injection
 builder.Services.AddDomainDI();
 builder.Services.AddApplicationDI(builder.Configuration);
 builder.Services.AddInfrastructureDI(builder.Configuration);
@@ -72,36 +70,39 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
     
-    // Запускаем сидер для статусов тикетов
     await TicketStatusSeeder.SeedTicketStatusesAsync(context);
-    
-    // Запускаем сидер для ролей
     await RoleSeeder.SeedRolesAsync(roleManager);
-
-    // Запускаем сидер для Hall
     await HallSeeder.SeedHallsAsync(context);
-
-    // Запускаем сидер для Session
-    await SessionSeeder.SeedSessionsAsync(context);
 }
 
-// Запускаем сидер для заповнення даних Movie, Genres, Actors, MovieGenres, MovieActors
+// Movie мають бути створені ПЕРЕД Session
 await TmdbSeeder.SeedTmdbDataAsync(app.Services);
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Запуск SessionSeeder...");
+    await SessionSeeder.SeedSessionsAsync(context, logger);
+    logger.LogInformation("SessionSeeder завершено");
+}
 
-app.UseCors(reactClientCORSPolicy);
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors(reactClientCORSPolicy);
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<AbsoluteCinema.WebAPI.Hubs.RealtimeHub>("/realtimehub");
 
 app.Run();

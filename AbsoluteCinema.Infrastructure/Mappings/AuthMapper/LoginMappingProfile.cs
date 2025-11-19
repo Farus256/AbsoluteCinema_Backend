@@ -9,13 +9,11 @@ public class LoginMappingProfile : Profile
     public LoginMappingProfile()
     {
         CreateMap<LoginDto, ApplicationUser>()
-            // Username берем часть от email 
             .ForMember(dest => dest.UserName, opt =>
                 opt.MapFrom(src => src.Email.Substring(0, src.Email.IndexOf('@'))))
 
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
 
-            // Игнорируем ВСЕ свойства Identity, которые не используются в DTO
             .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Tickets, opt => opt.Ignore())

@@ -14,7 +14,6 @@ namespace AbsoluteCinema.Infrastructure.EntitiesConfiguration
             builder.Property(h => h.RowCount).IsRequired();
             builder.Property(h => h.PlaceCount).IsRequired();
 
-            // Relations with table Session
             builder.HasMany(h => h.Sessions)
                 .WithOne(s => s.Hall)
                 .HasForeignKey(s => s.HallId)

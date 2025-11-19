@@ -33,11 +33,7 @@ namespace AbsoluteCinema.Infrastructure
             services.AddScoped<IStatisticsService, StatisticsService>();
             services.AddScoped<IUserService, UserService>();
 
-
-            // Подключаем мапперы
             services.AddAutoMapper(typeof(LoginMappingProfile).Assembly);
-
-            // Надаєм http client для the movie database сервису
             services.AddHttpClient<TmdbService>();
 
             return services;

@@ -5,8 +5,6 @@ using System.IO;
 
 namespace AbsoluteCinema.Infrastructure.DbContexts
 {
-    // Фабрика для EF Core, которая создаёт AppDbContext во время команд миграций крч.
-    
     public class AppDbContextDesignTimeFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
         public AppDbContext CreateDbContext(string[] args)

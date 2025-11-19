@@ -112,14 +112,16 @@ namespace AbsoluteCinema.Application.Services
         
         public async Task<IEnumerable<SessionDto>> GetUpcomingSessionsByMovieAsync(int movieId)
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             now = DateTime.SpecifyKind(now, DateTimeKind.Unspecified);
 
             var sessions = await _unitOfWork.Repository<Session>().GetAllAsync(
                 orderBy: query => query.OrderBy(s => s.Date),
                 include: query => query
                     .Include(s => s.Hall)
-                    .Where(s => s.Date >= now && s.MovieId == movieId)
+                    .Where(s => s.Date >= now && s.MovieId == movieId),
+                page: 1,
+                pageSize: 1000
             );
 
             return _mapper.Map<IEnumerable<SessionDto>>(sessions);

@@ -10,32 +10,14 @@ public class EntityMappingProfile : Profile
 {
     public EntityMappingProfile()
     {
-        // Actor
         CreateMap<Actor, ActorDto>().ReverseMap();
-
-        // Genre
         CreateMap<Genre, GenreDto>().ReverseMap();
-
-        // Hall
         CreateMap<Hall, HallDto>().ReverseMap();
-
-        // Movie
         CreateMap<Movie, MovieDto>().ReverseMap();
-
-        // Session
         CreateMap<Session, SessionDto>().ReverseMap();
-
-        // Ticket
-        CreateMap<Ticket, TicketDto>()
-            .ReverseMap();
-
-        // TicketStatus
+        CreateMap<Ticket, TicketDto>().ReverseMap();
         CreateMap<TicketStatus, TicketStatusDto>().ReverseMap();
-
-        // MovieGenre
         CreateMap<MovieGenre, MovieGenreDto>().ReverseMap();
-
-        // MovieActor
         CreateMap<MovieActor, MovieActorDto>().ReverseMap();
     }
 }

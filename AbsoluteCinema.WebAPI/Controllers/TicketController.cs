@@ -4,16 +4,20 @@ using AbsoluteCinema.Domain.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using AbsoluteCinema.WebAPI.Hubs;
 
 namespace AbsoluteCinema.WebAPI.Controllers;
 
 public class TicketController : BaseController
 {
     private readonly ITicketService _ticketService;
+    private readonly IHubContext<RealtimeHub> _hubContext;
         
-    public TicketController(ITicketService ticketService)
+    public TicketController(ITicketService ticketService, IHubContext<RealtimeHub> hubContext)
     {
         _ticketService = ticketService;
+        _hubContext = hubContext;
     }
         
     [HttpGet]
@@ -36,15 +40,38 @@ public class TicketController : BaseController
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = Policy.UserPolicy)]
     public async Task<ActionResult> CreateTicket([FromBody] CreateTicketDto createTicketDto)
     {
-        var id = await _ticketService.CreateTicketAsync(createTicketDto);
-        return Ok(id);
+        try
+        {
+            var id = await _ticketService.CreateTicketAsync(createTicketDto);
+            
+            try
+            {
+                await RealtimeHub.NotifySeatBooked(_hubContext, createTicketDto.SessionId, createTicketDto.Row, createTicketDto.Place);
+            }
+            catch (Exception ex)
+            {
+                // Логуємо помилку broadcast, але не перериваємо створення квитка
+                // Оскільки квиток вже створено успішно
+            }
+            
+            return Ok(id);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message, title = "Помилка бронювання" });
+        }
     }
         
     [HttpDelete]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = Policy.AdminPolicy)]
     public async Task<ActionResult> DeleteTicket(int id)
     {
-        await _ticketService.DeleteTicketAsync(id);
+        var ticket = await _ticketService.GetTicketByIdAsync(id);
+        if (ticket != null)
+        {
+            await _ticketService.DeleteTicketAsync(id);
+            await RealtimeHub.NotifySeatReleased(_hubContext, ticket.SessionId, ticket.Row, ticket.Place);
+        }
         return Ok();
     }
         

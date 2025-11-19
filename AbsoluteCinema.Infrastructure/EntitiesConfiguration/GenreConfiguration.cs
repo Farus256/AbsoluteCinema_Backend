@@ -12,7 +12,6 @@ namespace AbsoluteCinema.Infrastructure.EntitiesConfiguration
             builder.Property(g => g.Title).IsRequired().HasMaxLength(255);
             builder.HasIndex(g => g.Title).IsUnique();
 
-            // Relations with table MovieGenre
             builder.HasMany(g => g.MovieGenre)
                 .WithOne(mg => mg.Genre)
                 .HasForeignKey(mg => mg.GenreId)

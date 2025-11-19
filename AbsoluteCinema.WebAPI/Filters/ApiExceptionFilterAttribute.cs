@@ -19,7 +19,6 @@ namespace AbsoluteCinema.WebAPI.Filters
                 };
         }
 
-        //Викликається автоматично, коли у контролері виникає виняток
         public override void OnException(ExceptionContext context)
         {
             HandleException(context);
@@ -27,8 +26,6 @@ namespace AbsoluteCinema.WebAPI.Filters
             base.OnException(context);
         }
 
-        //Перевіряє, чи є виняток у _exceptionHandlers, якщо так – викликає відповідний обробник.
-        //Якщо модель ModelState є недійсною, викликає HandleInvalidModelStateException
         private void HandleException(ExceptionContext context)
         {
             Type type = context.Exception.GetType();
@@ -49,7 +46,6 @@ namespace AbsoluteCinema.WebAPI.Filters
         {
             var details = new ValidationProblemDetails(context.ModelState)
             {
-                //вказує на стандартний HTTP-код 400 Bad Request
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
             };
 
@@ -83,7 +79,6 @@ namespace AbsoluteCinema.WebAPI.Filters
             var details = new ValidationProblemDetails()
             {
                 Title = exception.Message,
-                //вказує на стандартний HTTP-код 404 Not Found
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
             };
 

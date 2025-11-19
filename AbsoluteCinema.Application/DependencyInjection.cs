@@ -15,10 +15,8 @@ namespace AbsoluteCinema.Application
     {
         public static IServiceCollection AddApplicationDI(this IServiceCollection services, IConfiguration configuration)
         {
-            // Подключаем флюент-валидаторы, ищет все валидаторы там где лежит LoginDtoValidator
             services.AddValidatorsFromAssemblyContaining<LoginDtoValidator>(ServiceLifetime.Transient);
 
-            // Підлючення сервісів
             services.AddScoped<IMovieService, MovieService>();
             services.AddScoped<IHallService, HallService>();
             services.AddScoped<IGenreService, GenreService>();
@@ -26,7 +24,6 @@ namespace AbsoluteCinema.Application
             services.AddScoped<ITicketService, TicketService>();
             services.AddScoped<IActorService, ActorService>();
 
-            //Token authentication with lifetime and issuer validation rules
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
 
                 options.TokenValidationParameters = new TokenValidationParameters {

@@ -69,12 +69,23 @@ namespace AbsoluteCinema.Application.Services
 
         public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync(GetAllMoviesDto getAllMoviesDto)
         {
-            // Будуємо делегат orderBy використовуючи динамічний LINQ
+            var normalizedPropertyName = NormalizePropertyName(getAllMoviesDto.OrderByProperty);
             Func<IQueryable<Movie>, IOrderedQueryable<Movie>> orderBy =
-                query => query.OrderBy($"{getAllMoviesDto.OrderByProperty} {getAllMoviesDto.OrderDirection}");
+                query => query.OrderBy($"{normalizedPropertyName} {getAllMoviesDto.OrderDirection}");
 
             var movies = await _unitOfWork.MovieRepository.GetAllAsync(orderBy, include: null, page: getAllMoviesDto.Page, getAllMoviesDto.PageSize);
             return _mapper.Map<IEnumerable<MovieDto>>(movies);
+        }
+
+        private string NormalizePropertyName(string propertyName)
+        {
+            if (string.IsNullOrEmpty(propertyName))
+                return propertyName;
+
+            if (char.IsUpper(propertyName[0]))
+                return propertyName;
+
+            return char.ToUpperInvariant(propertyName[0]) + propertyName.Substring(1);
         }
 
         public async Task<MovieDto?> GetMovieByIdAsync(int id)
@@ -100,9 +111,9 @@ namespace AbsoluteCinema.Application.Services
                 getMovieWithStrategyDto.ActorsIds,
                 getMovieWithStrategyDto.GenresIds);
 
-            // Будуємо делегат orderBy використовуючи динамічний LINQ
+            var normalizedPropertyName = NormalizePropertyName(getMovieWithStrategyDto.OrderByProperty);
             Func<IQueryable<Movie>, IOrderedQueryable<Movie>> orderBy = 
-                query => query.OrderBy($"{getMovieWithStrategyDto.OrderByProperty} {getMovieWithStrategyDto.OrderDirection}");
+                query => query.OrderBy($"{normalizedPropertyName} {getMovieWithStrategyDto.OrderDirection}");
 
             var query = _unitOfWork.MovieRepository.GetWithStrategy(strategy, orderBy, page: getMovieWithStrategyDto.Page, getMovieWithStrategyDto.PageSize);
             var movies = await query.ToListAsync();
@@ -138,7 +149,6 @@ namespace AbsoluteCinema.Application.Services
             return movies;
         }
         
-        // Этот метод был сделан за 1 запрос в chatGpt, я задумываюсь стоит ли мне дальше быть программистом.
         public async Task<IEnumerable<MovieDto>> GetPersonalizedMovieSuggestionsAsync(int userId)
         {
             var userTickets = await _unitOfWork.Repository<Ticket>().GetAllAsync(

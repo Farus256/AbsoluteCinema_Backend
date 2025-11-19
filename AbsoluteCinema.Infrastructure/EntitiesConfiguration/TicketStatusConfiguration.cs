@@ -11,7 +11,6 @@ namespace AbsoluteCinema.Infrastructure.EntitiesConfiguration
             builder.HasKey(ts => ts.Id);
             builder.Property(ts => ts.Name).IsRequired();
 
-            // Relations with table Ticket
             builder.HasMany(ts => ts.Tickets)
                 .WithOne(t => t.Status)
                 .HasForeignKey(t => t.StatusId);

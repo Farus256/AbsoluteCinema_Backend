@@ -16,13 +16,15 @@ namespace AbsoluteCinema.Infrastructure.EntitiesConfiguration
             builder.Property(t => t.Place);
             builder.Property(t => t.Price).IsRequired();
 
-            // Relations with table Session
+            builder.HasIndex(t => new { t.SessionId, t.Row, t.Place })
+                .IsUnique()
+                .HasDatabaseName("IX_Ticket_SessionId_Row_Place_Unique");
+
             builder.HasOne(t => t.Session)
                 .WithMany(s => s.Tickets)
                 .HasForeignKey(t => t.SessionId)
                 .IsRequired();
 
-            // Relations with table TicketStatus
             builder.HasOne(t => t.Status)
                 .WithMany(ts => ts.Tickets)
                 .HasForeignKey(t => t.StatusId)

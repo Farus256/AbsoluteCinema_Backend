@@ -51,19 +51,14 @@ namespace AbsoluteCinema.Application.Services
                 .OrderByDescending(m => m.Popularity)
                 .Take(quantityOfMoviesInTop);
 
-            // Выполняем запрос и получаем данные
             var movieData = query.ToList();
-
-            // Получаем данные о фильмах
             var movieIds = movieData.Select(m => m.MovieId).ToList();
             var movies = await _unitOfWork.Repository<Movie>().GetAllAsync();
 
-            // Извлекаем названия фильмов по их Id
             var movieTitles = movies
                 .Where(m => movieIds.Contains(m.Id))
                 .ToDictionary(m => m.Id, m => m.Title);
 
-            // Формируем конечный список DTO с названиями
             var result = movieData.Select(m => new TopMovieDto
             {
                 MovieId = m.MovieId,

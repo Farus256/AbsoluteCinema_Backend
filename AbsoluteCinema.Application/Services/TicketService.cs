@@ -24,6 +24,22 @@ namespace AbsoluteCinema.Application.Services
         
         public async Task<int> CreateTicketAsync(CreateTicketDto createTicketDto)
         {
+            var strategy = new TicketStrategy(
+                sessionId: createTicketDto.SessionId,
+                row: createTicketDto.Row,
+                place: createTicketDto.Place
+            );
+            
+            var existingTicketsQuery = _unitOfWork.Repository<Ticket>()
+                .GetWithStrategy(strategy, orderBy: null, page: 1, pageSize: 1);
+            
+            var existingTicket = await existingTicketsQuery.FirstOrDefaultAsync();
+            
+            if (existingTicket != null)
+            {
+                throw new InvalidOperationException($"Місце (Ряд: {createTicketDto.Row}, Місце: {createTicketDto.Place}) вже заброньоване для цього сеансу.");
+            }
+            
             var ticket = _mapper.Map<Ticket>(createTicketDto);
             _unitOfWork.Repository<Ticket>().Add(ticket);
             await _unitOfWork.SaveChangesAsync();
