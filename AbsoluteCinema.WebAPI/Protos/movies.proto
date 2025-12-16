@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "AbsoluteCinema.WebAPI.Grpc";
+
+package movies;
+
+message GetMovieRequest {
+  int32 id = 1;
+}
+
+message MovieReply {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  double score = 4;
+  bool adult = 5;
+  string posterPath = 6;
+  string language = 7;
+  string releaseDate = 8;
+}
+
+service MovieGrpc {
+  rpc GetMovieById(GetMovieRequest) returns (MovieReply);
+}
+
