@@ -6,9 +6,12 @@ using AbsoluteCinema.Infrastructure.DbContexts;
 using AbsoluteCinema.Infrastructure.Identity.Data;
 using AbsoluteCinema.Infrastructure.Seeders;
 using AbsoluteCinema.WebAPI.Filters;
+using AbsoluteCinema.WebAPI.Grpc.Services;
 using Microsoft.AspNetCore.Identity;
 using AbsoluteCinema.WebAPI.Swagger;
 using Microsoft.OpenApi.Models;
+using Grpc.AspNetCore.Server;
+using Grpc.AspNetCore.Web;
 
 string reactClientCORSPolicy = "reactClientCORSPolicy";
 
@@ -36,6 +39,7 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddSignalR();
+builder.Services.AddGrpc();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
@@ -93,6 +97,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(reactClientCORSPolicy);
+app.UseGrpcWeb();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -104,5 +109,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<AbsoluteCinema.WebAPI.Hubs.RealtimeHub>("/realtimehub");
+app.MapGrpcService<MovieGrpcService>().EnableGrpcWeb().RequireCors(reactClientCORSPolicy);
 
 app.Run();
