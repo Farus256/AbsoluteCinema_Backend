@@ -12,6 +12,8 @@ using AbsoluteCinema.WebAPI.Swagger;
 using Microsoft.OpenApi.Models;
 using Grpc.AspNetCore.Server;
 using Grpc.AspNetCore.Web;
+using HotChocolate.AspNetCore;
+using AbsoluteCinema.WebAPI.GraphQL;
 
 string reactClientCORSPolicy = "reactClientCORSPolicy";
 
@@ -25,6 +27,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(clientAddress)
               .AllowAnyMethod()
               .AllowAnyHeader()
+              .WithExposedHeaders("grpc-status", "grpc-message", "grpc-status-details-bin")
               .AllowCredentials()
               .SetIsOriginAllowedToAllowWildcardSubdomains(); 
     });
@@ -39,7 +42,14 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddSignalR();
-builder.Services.AddGrpc();
+// Configure gRPC with detailed errors in development
+builder.Services.AddGrpc(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+});
+
+// Add GraphQL services
+builder.Services.AddGraphQLSchema();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
@@ -96,19 +106,26 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
+app.UseRouting();
+
+// Configure CORS
 app.UseCors(reactClientCORSPolicy);
-app.UseGrpcWeb();
 
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
+// Enable gRPC-Web middleware
+app.UseGrpcWeb();
 
+// Map endpoints
 app.MapControllers();
-app.MapHub<AbsoluteCinema.WebAPI.Hubs.RealtimeHub>("/realtimehub");
 app.MapGrpcService<MovieGrpcService>().EnableGrpcWeb().RequireCors(reactClientCORSPolicy);
+app.MapHub<AbsoluteCinema.WebAPI.Hubs.RealtimeHub>("/realtimehub");
+
+// Map GraphQL endpoint
+app.MapGraphQL();
 
 app.Run();
