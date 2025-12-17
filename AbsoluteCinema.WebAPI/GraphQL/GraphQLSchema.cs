@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using AbsoluteCinema.WebAPI.GraphQL.Middleware;
 using AbsoluteCinema.WebAPI.GraphQL.Queries;
 using AbsoluteCinema.WebAPI.GraphQL.Types;
 
@@ -17,7 +16,6 @@ namespace AbsoluteCinema.WebAPI.GraphQL
                 .AddFiltering()
                 .AddSorting()
                 .AddProjections();
-                //.UseRequest<RequestLoggingMiddleware>();
 
             return services;
         }

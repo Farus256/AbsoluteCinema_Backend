@@ -33,12 +33,12 @@ public sealed class MovieGrpcService(IMovieService movieService, ILogger<MovieGr
                 Adult = movie.Adult,
                 PosterPath = movie.PosterPath ?? string.Empty,
                 Language = movie.Language.ToString(),
-                ReleaseDate = movie.ReleaseDate?.ToString("O") ?? string.Empty
+                ReleaseDate = movie.ReleaseDate?.ToString("O") ?? string.Empty,
+                TrailerPath = movie.TrailerPath ?? string.Empty
             };
         }
         catch (RpcException)
         {
-            // Already a well-defined gRPC error, just propagate
             throw;
         }
         catch (Exception ex)

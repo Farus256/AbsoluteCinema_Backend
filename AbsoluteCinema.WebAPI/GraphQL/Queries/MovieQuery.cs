@@ -11,14 +11,6 @@ namespace AbsoluteCinema.WebAPI.GraphQL.Queries
 
     public class MovieQuery
     {
-        [GraphQLName("personalizedMovieSuggestions")]
-        public async Task<IEnumerable<MovieDto>> GetPersonalizedMovieSuggestions(
-            int userId,
-            [Service] IMovieService movieService)
-        {
-            return await movieService.GetPersonalizedMovieSuggestionsAsync(userId);
-        }
-
         [GraphQLName("moviesPaged")]
         public async Task<IEnumerable<MovieDto>> GetMoviesPaged(
             int page,
@@ -46,7 +38,5 @@ namespace AbsoluteCinema.WebAPI.GraphQL.Queries
                 PosterPath = m.PosterPath
             });
         }
-
-
     }
 }

@@ -17,6 +17,7 @@ message MovieReply {
   string posterPath = 6;
   string language = 7;
   string releaseDate = 8;
+  string trailerPath = 9;
 }
 
 service MovieGrpc {
