@@ -34,7 +34,7 @@ public class SessionController : BaseController
 
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = Policy.AdminPolicy)]
-    public async Task<ActionResult> CreateSession([FromBody] CreateSessionDto createTicketDto)
+    public async Task<ActionResult> CreateSession([FromQuery] CreateSessionDto createTicketDto)
     {
         var id = await _sessionService.CreateSessionAsync(createTicketDto);
         return Ok(id);
@@ -50,7 +50,7 @@ public class SessionController : BaseController
 
     [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = Policy.AdminPolicy)]
-    public async Task<ActionResult> UpdateSession([FromBody] UpdateSessionDto updateTicketDto)
+    public async Task<ActionResult> UpdateSession([FromQuery] UpdateSessionDto updateTicketDto)
     {
         await _sessionService.UpdateSessionAsync(updateTicketDto);
         return Ok();
@@ -71,7 +71,7 @@ public class SessionController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetSessionsForAdmin([FromBody] GetAllSessionDto getAllSessionDto)
+    public async Task<ActionResult> GetSessionsForAdmin([FromQuery] GetAllSessionDto getAllSessionDto)
     {
         var tickets = await _sessionService.GetAllSessionsWithIncludeAsync(getAllSessionDto);
         return Ok(tickets);

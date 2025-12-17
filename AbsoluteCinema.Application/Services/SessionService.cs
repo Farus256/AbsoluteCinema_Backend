@@ -42,7 +42,10 @@ namespace AbsoluteCinema.Application.Services
             Func<IQueryable<Session>, IOrderedQueryable<Session>> orderBy =
                 query => query.OrderBy($"{getDto.OrderByProperty} {getDto.OrderDirection}");
 
-            var sessions = await _unitOfWork.Repository<Session>().GetAllAsync(orderBy, include: null, page: getDto.Page, getDto.PageSize);
+            var sessions = await _unitOfWork.Repository<Session>().GetAllAsync(orderBy, include: q => q
+                .Include(s => s.Movie)
+                .Include(s => s.Hall),
+                page: getDto.Page, getDto.PageSize);
             return _mapper.Map<IEnumerable<SessionDto>>(sessions);
         }
         
@@ -119,7 +122,8 @@ namespace AbsoluteCinema.Application.Services
                 orderBy: query => query.OrderBy(s => s.Date),
                 include: query => query
                     .Include(s => s.Hall)
-                    .Where(s => s.Date >= now && s.MovieId == movieId),
+                    .Where(s=>s.MovieId == movieId),
+                    //.Where(s => s.Date >= now && s.MovieId == movieId),
                 page: 1,
                 pageSize: 1000
             );
