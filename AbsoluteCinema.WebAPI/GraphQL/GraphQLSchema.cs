@@ -11,12 +11,13 @@ namespace AbsoluteCinema.WebAPI.GraphQL
         {
             services
                 .AddGraphQLServer()
+                .ModifyRequestOptions(o => o.IncludeExceptionDetails = true)
                 .AddQueryType<MovieQuery>()
                 .AddType<MovieType>()
                 .AddFiltering()
                 .AddSorting()
-                .AddProjections()
-                .UseRequest<RequestLoggingMiddleware>();
+                .AddProjections();
+                //.UseRequest<RequestLoggingMiddleware>();
 
             return services;
         }

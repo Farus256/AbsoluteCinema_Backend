@@ -1,44 +1,52 @@
 using AbsoluteCinema.Application.Contracts;
+using AbsoluteCinema.Application.DTO.Entities;
+using AbsoluteCinema.Application.DTO.MoviesDTO;
+using AbsoluteCinema.Domain.Entities;
+using AbsoluteCinema.Domain.Interfaces;
 using HotChocolate.Types;
 using Microsoft.Extensions.Logging;
 
 namespace AbsoluteCinema.WebAPI.GraphQL.Queries
 {
+
     public class MovieQuery
     {
-        [GraphQLName("movies")]
-        [GraphQLDescription("Gets all movies with included related data")]
-        public async Task<IEnumerable<AbsoluteCinema.Application.DTO.Entities.MovieDto>> GetMovies(
-            [Service] IMovieService movieService,
-            [Service] ILogger<MovieQuery> logger)
+        [GraphQLName("personalizedMovieSuggestions")]
+        public async Task<IEnumerable<MovieDto>> GetPersonalizedMovieSuggestions(
+            int userId,
+            [Service] IMovieService movieService)
         {
-            try
-            {
-                return await movieService.GetAllMoviesWithIncludeAsync();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error while getting movies");
-                throw;
-            }
+            return await movieService.GetPersonalizedMovieSuggestionsAsync(userId);
         }
 
-        [GraphQLName("movie")]
-        [GraphQLDescription("Gets a movie by its ID")]
-        public async Task<AbsoluteCinema.Application.DTO.Entities.MovieDto?> GetMovieById(
-            [GraphQLName("id")] int id,
-            [Service] IMovieService movieService,
-            [Service] ILogger<MovieQuery> logger)
+        [GraphQLName("moviesPaged")]
+        public async Task<IEnumerable<MovieDto>> GetMoviesPaged(
+            int page,
+            int pageSize,
+            [Service] IMovieService movieService)
         {
-            try
+            return await movieService.GetAllMoviesAsync(new GetAllMoviesDto
             {
-                return await movieService.GetMovieByIdAsync(id);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"Error while getting movie with ID {id}");
-                throw;
-            }
+                Page = page,
+                PageSize = pageSize,
+                OrderByProperty = "Id",
+                OrderDirection = "asc"
+            });
         }
+
+        [GraphQLName("movieCards")]
+        public async Task<IEnumerable<MovieCardDto>> GetMovieCards([Service] IUnitOfWork uow)
+        {
+            var movies = await uow.Repository<Movie>().GetAllAsync(); // без include
+
+            return movies.Select(m => new MovieCardDto
+            {
+                Id = m.Id,
+                Title = m.Title,
+                PosterPath = m.PosterPath
+            });
+        }
+
+
     }
 }

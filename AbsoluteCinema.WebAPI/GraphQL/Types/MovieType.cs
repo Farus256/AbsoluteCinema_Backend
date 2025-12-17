@@ -46,13 +46,13 @@ namespace AbsoluteCinema.WebAPI.GraphQL.Types
                 .Field(m => m.TrailerPath)
                 .Description("Trailer path");
 
-            descriptor
+            /*descriptor
                 .Field(m => m.MovieGenres)
                 .Description("Genres linked to the movie");
 
             descriptor
                 .Field(m => m.MovieActors)
-                .Description("Actors linked to the movie");
+                .Description("Actors linked to the movie");*/
         }
     }
 }
